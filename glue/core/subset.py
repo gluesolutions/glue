@@ -1475,9 +1475,9 @@ class ElementSubsetState(SubsetState):
             self._start_att = start_att
             self._end_att = end_att
 
-            self._chr_att_val = self._data[chr_att][self._indices][0]
-            self._start_att_val = self._data[start_att][self._indices][0]
-            self._end_att_val = self._data[end_att][self._indices][0]
+            self._chr_att_val = self._data[chr_att][self._indices]
+            self._start_att_val = self._data[start_att][self._indices]
+            self._end_att_val = self._data[end_att][self._indices]
         else:
             print("creating an ElementSubsetState without any chr_att")
             print(data)
@@ -1496,19 +1496,23 @@ class ElementSubsetState(SubsetState):
         #else:
         #    self._end_att = end_att
 
-    #@contract(data='issubclass(GenomicData)')
+    @contract(data='issubclass(GenomicData)')
     def to_genome_range(self):
         """
         Convert this SubsetState to a GenomicRangeSubsetState
-        Should use self._start_att and self._end_att to lookup
-        the correct values
         """
-        from glue_genomics_viewers.subsets import GenomicRangeSubsetState #To avoid circular import
+        from glue_genomics_viewers.subsets import GenomicRangeSubsetState, GenomicMulitRangeSubsetState #To avoid circular import
         print("In to_genome_range")
-        print(self._chr_att_val)
-        print(self._start_att_val)
-        print(self._end_att_val)
-        return GenomicRangeSubsetState(self._chr_att_val,self._start_att_val, self._end_att_val)
+        genome_states = []
+        for chr,start,end in zip(self._chr_att_val, self._start_att_val, self._end_att_val):
+            print(chr)
+            print(start)
+            print(end)
+            genome_states.append(GenomicRangeSubsetState(chr, start, end))
+        if len(genome_states) == 1: #Special case but not really necessary...
+            return genome_states[0]
+        else:
+            return GenomicMulitRangeSubsetState(genome_states)
 
 
     @property
