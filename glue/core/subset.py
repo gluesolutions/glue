@@ -1505,9 +1505,6 @@ class ElementSubsetState(SubsetState):
         print("In to_genome_range")
         genome_states = []
         for chr,start,end in zip(self._chr_att_val, self._start_att_val, self._end_att_val):
-            print(chr)
-            print(start)
-            print(end)
             genome_states.append(GenomicRangeSubsetState(chr, start, end))
         if len(genome_states) == 1: #Special case but not really necessary...
             return genome_states[0]
