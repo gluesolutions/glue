@@ -248,9 +248,13 @@ class TableViewer(DataViewer):
     def finalize_selection(self, clear=True):
         model = self.ui.table.selectionModel()
         selected_rows = [self.model.order_visible[x.row()] for x in model.selectedRows()]
-        subset_state = ElementSubsetState(indices=selected_rows, data=self.data)
+        print("Defining subset_state") #chr_att, start_att, and end_att should be None if they don't exist in data
+        subset_state = ElementSubsetState(indices=selected_rows, data=self.data, chr_att='chr', start_att='start', end_att='end')
+        print("subset_state defined")
         mode = self.session.edit_subset_mode
+        print("mode set")
         mode.update(self._data, subset_state, focus_data=self.data)
+        print("mode is updated")
         if clear:
             # We block the signals here to make sure that we don't update
             # the subset again once the selection is cleared.

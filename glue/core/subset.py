@@ -17,6 +17,8 @@ from glue.config import settings
 from glue.utils import (view_shape, broadcast_to, floodfill, combine_slices,
                         polygon_line_intersections, categorical_ndarray, iterate_chunks)
 
+#from glue_genomics_viewers.genomic_data import GenomicData
+#from glue_genomics_viewers.subsets import GenomicRangeSubsetState
 
 __all__ = ['Subset', 'SubsetState', 'RoiSubsetStateNd', 'RoiSubsetState', 'CategoricalROISubsetState',
            'RangeSubsetState', 'MultiRangeSubsetState', 'CompositeSubsetState',
@@ -418,6 +420,8 @@ class SubsetState(object):
         The attributes that the subset state depends on.
         """
         return tuple()
+
+
 
     @property
     def subset_state(self):  # convenience method, mimic interface of Subset
@@ -1448,16 +1452,70 @@ class ElementSubsetState(SubsetState):
         Any valid object that can be used to index a Numpy array.
     data : :class:`~glue.core.data.Data`
         The data in whose space the indices are defined.
+    start_att
+        Component describing the start of a GenomicRange
+    end_att
+        Component describing the end of a GenomicRange
     """
 
-    def __init__(self, indices=None, data=None):
+    def __init__(self, indices=None, data=None, chr_att=None, start_att=None, end_att=None):
         super(ElementSubsetState, self).__init__()
         self._indices = indices
         if data is None:
             self._data_uuid = None
+            self._data = data
         else:
             self._data_uuid = data.uuid
+            self._data = data
+        if chr_att is not None:
+            print(f"chr_att = {chr_att}")
+            print(data)
+            print(f'data[chr_att] = {data[chr_att]}')
+            self._chr_att = chr_att
+            self._start_att = start_att
+            self._end_att = end_att
 
+            self._chr_att_val = self._data[chr_att][self._indices]
+            self._start_att_val = self._data[start_att][self._indices]
+            self._end_att_val = self._data[end_att][self._indices]
+        else:
+            print("creating an ElementSubsetState without any chr_att")
+            print(data)
+            print(self._indices)
+            print(self._data_uuid)
+        #if chr is None:
+        #    self._chr_att = None
+        #else:
+        #    self._chr_att = chr
+        #if start_att is None:
+        #    self._start_att = None
+        #else:
+        #    self._start_att = start_att
+        #if end_att is None:
+        #    self._end_att = None
+        #else:
+        #    self._end_att = end_att
+
+    @contract(data='issubclass(GenomicData)')
+    def to_genome_range(self):
+        """
+        Convert this SubsetState to a GenomicRangeSubsetState
+        """
+        from glue_genomics_viewers.subsets import GenomicRangeSubsetState, GenomicMulitRangeSubsetState #To avoid circular import
+        print("In to_genome_range")
+        genome_states = []
+        for chr,start,end in zip(self._chr_att_val, self._start_att_val, self._end_att_val):
+            genome_states.append(GenomicRangeSubsetState(chr, start, end))
+        if len(genome_states) == 1: #Special case but not really necessary...
+            return genome_states[0]
+        else:
+            return GenomicMulitRangeSubsetState(genome_states)
+
+
+    @property
+    def attributes(self):
+        return tuple(self._chr_att, self._start_att, self._end_att)
+        
     @property
     def indices(self):
         """
@@ -1499,12 +1557,12 @@ class ElementSubsetState(SubsetState):
         else:
             raise IncompatibleAttribute()
 
-    @property
-    def attributes(self):
-        return self._data.pixel_component_ids
+    #@property
+    #def attributes(self):
+    #    return self._data.pixel_component_ids
 
     def copy(self):
-        state = ElementSubsetState(indices=self._indices)
+        state = ElementSubsetState(indices=self._indices, data=self._data, chr_att=self._chr_att, start_att=self._start_att, end_att=self._end_att)
         state._data_uuid = self._data_uuid
         return state
 
@@ -1520,6 +1578,8 @@ class ElementSubsetState(SubsetState):
         except KeyError:  # BACKCOMPAT
             pass
         return state
+        
+
 
 
 VALID_INEQUALTIY_OPS = [operator.gt, operator.ge,
