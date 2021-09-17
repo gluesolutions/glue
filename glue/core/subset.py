@@ -422,7 +422,6 @@ class SubsetState(object):
         return tuple()
 
 
-
     @property
     def subset_state(self):  # convenience method, mimic interface of Subset
         return self
@@ -1483,6 +1482,9 @@ class ElementSubsetState(SubsetState):
             print(data)
             print(self._indices)
             print(self._data_uuid)
+            self._chr_att = None
+            self._start_att = None
+            self._end_att = None
         #if chr is None:
         #    self._chr_att = None
         #else:
@@ -1512,9 +1514,9 @@ class ElementSubsetState(SubsetState):
             return GenomicMulitRangeSubsetState(genome_states)
 
 
-    @property
-    def attributes(self):
-        return tuple(self._chr_att, self._start_att, self._end_att)
+    #@property
+    #def attributes(self):
+    #    return tuple(self._chr_att, self._start_att, self._end_att)
         
     @property
     def indices(self):
