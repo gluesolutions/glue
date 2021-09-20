@@ -1467,9 +1467,6 @@ class ElementSubsetState(SubsetState):
             self._data_uuid = data.uuid
             self._data = data
         if chr_att is not None:
-            #print(f"chr_att = {chr_att}")
-            #print(data)
-            #print(f'data[chr_att] = {data[chr_att]}')
             self._chr_att = chr_att
             self._start_att = start_att
             self._end_att = end_att
@@ -1485,18 +1482,6 @@ class ElementSubsetState(SubsetState):
             self._chr_att = None
             self._start_att = None
             self._end_att = None
-        #if chr is None:
-        #    self._chr_att = None
-        #else:
-        #    self._chr_att = chr
-        #if start_att is None:
-        #    self._start_att = None
-        #else:
-        #    self._start_att = start_att
-        #if end_att is None:
-        #    self._end_att = None
-        #else:
-        #    self._end_att = end_att
 
     @contract(data='issubclass(GenomicData)')
     def to_genome_range(self):
@@ -1504,7 +1489,6 @@ class ElementSubsetState(SubsetState):
         Convert this SubsetState to a GenomicRangeSubsetState
         """
         from glue_genomics_viewers.subsets import GenomicRangeSubsetState, GenomicMulitRangeSubsetState #To avoid circular import
-        #print("In to_genome_range")
         genome_states = []
         for chr,start,end in zip(self._chr_att_val, self._start_att_val, self._end_att_val):
             genome_states.append(GenomicRangeSubsetState(chr, start, end))
@@ -1512,11 +1496,6 @@ class ElementSubsetState(SubsetState):
             return genome_states[0]
         else:
             return GenomicMulitRangeSubsetState(genome_states)
-
-
-    #@property
-    #def attributes(self):
-    #    return tuple(self._chr_att, self._start_att, self._end_att)
         
     @property
     def indices(self):
