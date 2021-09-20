@@ -1,10 +1,14 @@
-|Azure Status| |Coverage Status| |DOI| |User mailing list| |Developer mailing list|
+|DOI| |User mailing list| |Developer mailing list|
 
 Glue
 ====
 
 Glue is a python project to link visualizations of scientific datasets
-across many files. Click on the image for a quick demo:
+across many files. 
+
+**This fork contains changes necessary to enable** `genomics data readers <https://github.com/gluesolutions/glue-genomics-data>`_ and `genomics data viewers <https://github.com/gluesolutions/glue-genomics-viewers>`_
+
+Click on the image for a quick demo:
 
 |Glue demo|
 
