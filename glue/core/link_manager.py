@@ -23,7 +23,7 @@ from glue.core.hub import HubListener
 from glue.core.message import DataCollectionDeleteMessage, DataRemoveComponentMessage
 from glue.core.contracts import contract
 from glue.core.link_helpers import LinkCollection
-from glue.core.component_link import ComponentLink
+from glue.core.component_link import ComponentLink, KeyLink
 from glue.core.data import Data
 from glue.core.component import DerivedComponent
 from glue.core.exceptions import IncompatibleAttribute
@@ -190,14 +190,39 @@ class LinkManager(HubListener):
 
     @contract(link=ComponentLink)
     def remove_link(self, link, update_external=True):
+        from glue_tree_viewer.utils import Link_Index_By_Value #Need to move this into core
+
+        #print(link)
+        #print(self.external_links)
+        #assert False
+        #print("Called remove link")
         if isinstance(link, list):
             for l in link:
                 self.remove_link(l, update_external=False)
             if update_external:
                 self.update_externally_derivable_components()
         else:
-            logging.getLogger(__name__).debug('removing link %s', link)
+            print("Removing link")
+            logging.getLogger(__name__).info('removing link %s', link)
             self._external_links.remove(link)
+            if isinstance(link, Link_Index_By_Value):
+                data_to_remove_from_data1 = None
+                data_to_remove_from_data2 = None
+                for other_data, key_join in link.data1._key_joins.items():
+                    print(f'other_data = {other_data}')
+                    print(f'key_join = {key_join}')
+                    cid, cid_other = key_join
+                    if (other_data == link.data2):
+                        print("Found a matching dataset")
+                        print(f'cid = {cid}')
+                        print(f'cid_other = {cid_other}')
+                        print(f'link.cids1[0] = {link.cids1[0]}')
+                        print(f'link.cids2[0] = {link.cids2[0]}')
+                        if (cid[0] == link.cids1[0]) and (cid_other[0] == link.cids2[0]): #assumes single-linkage
+                            data_to_remove_from_data1 = other_data
+                            data_to_remove_from_data2 = link.data1
+                link.data1._key_joins.pop(data_to_remove_from_data1) #Assume these joins are set up right
+                link.data2._key_joins.pop(data_to_remove_from_data2)
             if update_external:
                 self.update_externally_derivable_components()
 
