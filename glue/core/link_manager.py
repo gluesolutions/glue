@@ -246,6 +246,7 @@ class LinkManager(HubListener):
         DerivedComponents will be replaced / added into
         the data object
         """
+        print("Inside update_externally_derivable_components")
 
         if self.data_collection is None:
             if data is None:
@@ -260,10 +261,12 @@ class LinkManager(HubListener):
 
         for data in data_collection:
             links = discover_links(data, self._links | self._inverse_links)
+            print(f"links for {data.label} are {links}")
             comps = {}
             for cid, link in links.items():
                 d = DerivedComponent(data, link)
                 comps[cid] = d
+            print(f"comps for {data.label} are now {comps}")
             data._set_externally_derivable_components(comps)
 
         # Now update information about pixel-aligned data

@@ -410,8 +410,11 @@ class KeyLink(ComponentLink):
         """ The list of input ComponentIDs """
         return self._from
 
+    def __str__(self):
+        return '<KeyLink>' 
+
     def __repr__(self):
-        return "<KeyLink: %s>" % self
+        return "<KeyLink>"
 
 class BinaryComponentLink(ComponentLink):
 
