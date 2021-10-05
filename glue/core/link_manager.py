@@ -23,6 +23,7 @@ from glue.core.hub import HubListener
 from glue.core.message import DataCollectionDeleteMessage, DataRemoveComponentMessage
 from glue.core.contracts import contract
 from glue.core.link_helpers import LinkCollection
+from glue.plugins.join_on_key import Index_Link
 from glue.core.component_link import ComponentLink, KeyLink
 from glue.core.data import Data
 from glue.core.component import DerivedComponent
@@ -190,7 +191,6 @@ class LinkManager(HubListener):
 
     @contract(link=ComponentLink)
     def remove_link(self, link, update_external=True):
-        from glue_tree_viewer.utils import Link_Index_By_Value #Need to move this into core
 
         #print(link)
         #print(self.external_links)
@@ -205,7 +205,7 @@ class LinkManager(HubListener):
             print("Removing link")
             logging.getLogger(__name__).info('removing link %s', link)
             self._external_links.remove(link)
-            if isinstance(link, Link_Index_By_Value):
+            if isinstance(link, Index_Link):
                 data_to_remove_from_data1 = None
                 data_to_remove_from_data2 = None
                 for other_data, key_join in link.data1._key_joins.items():

@@ -9,7 +9,7 @@ from qtpy.QtWidgets import (QGraphicsView, QGraphicsScene, QApplication,
 
 from glue.utils.qt import mpl_to_qt_color, qt_to_mpl_color
 from glue.core.component_link import KeyLink
-from glue_tree_viewer.utils import Link_Index_By_Value
+from glue.plugins.join_on_key import Index_Link
 
 COLOR_SELECTED = (0.2, 0.9, 0.2)
 COLOR_CONNECTED = (0.6, 0.9, 0.9)

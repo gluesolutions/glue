@@ -10,7 +10,7 @@ from glue.core.state_objects import State
 from echo import CallbackProperty, SelectionCallbackProperty, delay_callback
 from glue.core.data_combo_helper import DataCollectionComboHelper, ComponentIDComboHelper
 from glue.core.component_link import KeyLink
-from glue_tree_viewer.utils import Link_Index_By_Value
+from glue_tree_viewer.utils import Index_Link
 
 __all__ = ['LinkEditorState', 'EditableLinkFunctionState']
 
@@ -200,7 +200,7 @@ class EditableLinkFunctionState(State):
         if names2 is None:
             names2 = []
             
-        if isinstance(function, Link_Index_By_Value):
+        if isinstance(function, Index_link):
             key_link = True
         else:
             key_link = False
@@ -227,7 +227,7 @@ class EditableLinkFunctionState(State):
         print(f'function in __init__ is {function}')
 
         self.key_link = False
-        if isinstance(function, Link_Index_By_Value):
+        if isinstance(function, Index_Link):
             self.key_link = True
 
 
