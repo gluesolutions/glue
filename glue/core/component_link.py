@@ -396,6 +396,25 @@ class CoordinateComponentLink(ComponentLink):
         sup = super(CoordinateComponentLink, self).__str__()
         return sup.replace('using', rep)
 
+class KeyLink(ComponentLink):
+    """
+    A dummy class to keep track of join_on_key type joins
+    """
+    def __init__(self):
+        self._from = []
+        self._to = None
+        self._using = None
+        self._inverse = None
+
+    def get_from_ids(self):
+        """ The list of input ComponentIDs """
+        return self._from
+
+    def __str__(self):
+        return '<KeyLink>' 
+
+    def __repr__(self):
+        return "<KeyLink>"
 
 class BinaryComponentLink(ComponentLink):
 

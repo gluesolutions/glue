@@ -23,7 +23,8 @@ from glue.core.hub import HubListener
 from glue.core.message import DataCollectionDeleteMessage, DataRemoveComponentMessage
 from glue.core.contracts import contract
 from glue.core.link_helpers import LinkCollection
-from glue.core.component_link import ComponentLink
+from glue.plugins.join_on_key.link_helpers import Index_Link
+from glue.core.component_link import ComponentLink, KeyLink
 from glue.core.data import Data
 from glue.core.component import DerivedComponent
 from glue.core.exceptions import IncompatibleAttribute
@@ -198,6 +199,17 @@ class LinkManager(HubListener):
         else:
             logging.getLogger(__name__).debug('removing link %s', link)
             self._external_links.remove(link)
+            if isinstance(link, Index_Link):
+                data_to_remove_from_data1 = None
+                data_to_remove_from_data2 = None
+                for other_data, key_join in link.data1._key_joins.items():
+                    cid, cid_other = key_join
+                    if (other_data == link.data2):
+                        if (cid[0] == link.cids1[0]) and (cid_other[0] == link.cids2[0]): #assumes single-linkage
+                            data_to_remove_from_data1 = other_data
+                            data_to_remove_from_data2 = link.data1
+                link.data1._key_joins.pop(data_to_remove_from_data1) #Assume these joins are set up right
+                link.data2._key_joins.pop(data_to_remove_from_data2)
             if update_external:
                 self.update_externally_derivable_components()
 
