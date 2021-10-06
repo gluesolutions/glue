@@ -10,7 +10,7 @@ from glue.core.state_objects import State
 from echo import CallbackProperty, SelectionCallbackProperty, delay_callback
 from glue.core.data_combo_helper import DataCollectionComboHelper, ComponentIDComboHelper
 from glue.core.component_link import KeyLink
-from glue_tree_viewer.utils import Index_Link
+from glue.plugins.join_on_key.link_helpers import Index_Link
 
 __all__ = ['LinkEditorState', 'EditableLinkFunctionState']
 
@@ -190,7 +190,6 @@ class EditableLinkFunctionState(State):
             names1 = function.labels1
             names2 = function.labels2
             
-        print(f'function in __new__ is {function}')
         class CustomizedStateClass(EditableLinkFunctionState):
             pass
         
@@ -200,7 +199,7 @@ class EditableLinkFunctionState(State):
         if names2 is None:
             names2 = []
             
-        if isinstance(function, Index_link):
+        if isinstance(function, Index_Link):
             key_link = True
         else:
             key_link = False
@@ -208,7 +207,6 @@ class EditableLinkFunctionState(State):
         setattr(CustomizedStateClass, 'names1', names1)
         setattr(CustomizedStateClass, 'names2', names2)
         setattr(CustomizedStateClass, 'key_link', key_link)
-        print(CustomizedStateClass.key_link)
 
         for index, input_arg in enumerate(CustomizedStateClass.names1):
             setattr(CustomizedStateClass, input_arg, SelectionCallbackProperty(default_index=index))
@@ -223,8 +221,6 @@ class EditableLinkFunctionState(State):
                  display=None, description=None, key_link=False):
 
         super(EditableLinkFunctionState, self).__init__()
-        
-        print(f'function in __init__ is {function}')
 
         self.key_link = False
         if isinstance(function, Index_Link):

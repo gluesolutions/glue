@@ -168,14 +168,11 @@ def get_connections(dc_links):
     for link in dc_links:
         data1 = link.data1
         data2 = link.data2
-        print(type(link))
-        #if isinstance(link, KeyLink):
         if link.key_link:
             key_link = True
         else:
             key_link = False
         if (data1, data2) not in links and (data2, data1) not in links:
-            print(f"I am in get_connections!!!!!! {key_link}")
             links.append((data1, data2, key_link))
 
     return links

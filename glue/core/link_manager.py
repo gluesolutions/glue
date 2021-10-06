@@ -191,33 +191,20 @@ class LinkManager(HubListener):
 
     @contract(link=ComponentLink)
     def remove_link(self, link, update_external=True):
-
-        #print(link)
-        #print(self.external_links)
-        #assert False
-        #print("Called remove link")
         if isinstance(link, list):
             for l in link:
                 self.remove_link(l, update_external=False)
             if update_external:
                 self.update_externally_derivable_components()
         else:
-            print("Removing link")
-            logging.getLogger(__name__).info('removing link %s', link)
+            logging.getLogger(__name__).debug('removing link %s', link)
             self._external_links.remove(link)
             if isinstance(link, Index_Link):
                 data_to_remove_from_data1 = None
                 data_to_remove_from_data2 = None
                 for other_data, key_join in link.data1._key_joins.items():
-                    print(f'other_data = {other_data}')
-                    print(f'key_join = {key_join}')
                     cid, cid_other = key_join
                     if (other_data == link.data2):
-                        print("Found a matching dataset")
-                        print(f'cid = {cid}')
-                        print(f'cid_other = {cid_other}')
-                        print(f'link.cids1[0] = {link.cids1[0]}')
-                        print(f'link.cids2[0] = {link.cids2[0]}')
                         if (cid[0] == link.cids1[0]) and (cid_other[0] == link.cids2[0]): #assumes single-linkage
                             data_to_remove_from_data1 = other_data
                             data_to_remove_from_data2 = link.data1
@@ -246,7 +233,6 @@ class LinkManager(HubListener):
         DerivedComponents will be replaced / added into
         the data object
         """
-        print("Inside update_externally_derivable_components")
 
         if self.data_collection is None:
             if data is None:
@@ -261,12 +247,10 @@ class LinkManager(HubListener):
 
         for data in data_collection:
             links = discover_links(data, self._links | self._inverse_links)
-            print(f"links for {data.label} are {links}")
             comps = {}
             for cid, link in links.items():
                 d = DerivedComponent(data, link)
                 comps[cid] = d
-            print(f"comps for {data.label} are now {comps}")
             data._set_externally_derivable_components(comps)
 
         # Now update information about pixel-aligned data
