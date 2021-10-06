@@ -23,7 +23,7 @@ from glue.core.hub import HubListener
 from glue.core.message import DataCollectionDeleteMessage, DataRemoveComponentMessage
 from glue.core.contracts import contract
 from glue.core.link_helpers import LinkCollection
-from glue.plugins.join_on_key import Index_Link
+from glue.plugins.join_on_key.link_helpers import Index_Link
 from glue.core.component_link import ComponentLink, KeyLink
 from glue.core.data import Data
 from glue.core.component import DerivedComponent

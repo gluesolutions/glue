@@ -17,8 +17,8 @@ class Index_Link(LinkCollection):
     display = "Link by ID/Index"
     description = "Link two datasets by a common ID or Index (for example, if two datasets have the same experiment ID)"
 
-    labels1 = ["first value column"]
-    labels2 = ["second value column"]
+    labels1 = ["ID in dataset 1"]
+    labels2 = ["ID in dataset 2"]
 
     def __init__(self, *args, cids1=None, cids2=None, data1=None, data2=None):
         # only support linking by one value now, even though link_by_value supports multiple
@@ -33,4 +33,4 @@ class Index_Link(LinkCollection):
         data1.join_on_key(data2, cids1[0], cids2[0])
         
         self._links = []
-        self._links = [KeyLink()]
+        #self._links = [KeyLink()]
