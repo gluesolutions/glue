@@ -53,6 +53,7 @@ class GroupedSubset(Subset):
         self.group = group
 
         self.data = data
+        self.meta = self.data.meta
         self.label = group.label  # trigger disambiguation
 
     @property
