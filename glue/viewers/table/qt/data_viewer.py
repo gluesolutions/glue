@@ -11,13 +11,14 @@ from glue.core import BaseData, Data
 from glue.utils.qt import load_ui
 from glue.viewers.common.qt.data_viewer import DataViewer
 from glue.viewers.common.qt.toolbar import BasicToolbar
-from glue.viewers.common.tool import CheckableTool
+from glue.viewers.common.tool import CheckableTool, Tool
 from glue.viewers.common.layer_artist import LayerArtist
 from glue.core.subset import ElementSubsetState
 from glue.utils.colors import alpha_blend_colors
 from glue.utils.qt import mpl_to_qt_color, messagebox_on_error
 from glue.core.exceptions import IncompatibleAttribute
 from glue.viewers.table.compat import update_table_viewer_state
+from glue.dialogs.interpolate_onto_3d.qt.interpolate_onto_3d import InterpolateOnto3DDialog
 
 __all__ = ['TableViewer', 'TableLayerArtist']
 
@@ -166,6 +167,42 @@ class TableLayerArtist(LayerArtist):
 
 
 @viewer_tool
+class GenomeRangeTo3D(Tool):
+    
+    icon = 'glue_genes'
+    tool_id = 'table:to3d'
+    action_text = 'Calculate x,y,z for these genome regions-of-interest'
+    tool_tip = 'Calculate x,y,z for these genome regions-of-interest'
+    def __init__(self, viewer):
+        super(GenomeRangeTo3D, self).__init__(viewer)
+    
+    def activate(self):
+        """
+        Calculate x,y,z for this table of regions-of-interest using
+        an interpolate of a 3D Genome structure.
+        
+        In general we need to specify the dataset for this structure.
+        For now we hack it and find ANY dataset with the appropriate
+        interpolating function
+        """
+        
+        #Launch the dialog
+        dialog = InterpolateOnto3DDialog(collect=self.viewer.session.data_collection, defaultx='x',defaulty='y',defaultz='z',table_data=self.viewer.data)
+        #dialog.show()
+        #dialog.raise_()
+        # I do not know why I need to call this, but I do, and it throws an error
+        # https://stackoverflow.com/questions/40982518/argument-1-has-unexpected-type-nonetype
+        try:
+            dialog.accepted.connect(InterpolateOnto3DDialog.interpolate(collect=self.viewer.session.data_collection,table_data=self.viewer.data))
+        except TypeError:
+            pass
+        #dialog.exec_()
+
+    def close(self):
+        pass
+
+
+@viewer_tool
 class RowSelectTool(CheckableTool):
 
     tool_id = 'table:rowselect'
@@ -209,7 +246,7 @@ class TableViewer(DataViewer):
     _subset_artist_cls = TableLayerArtist
 
     inherit_tools = False
-    tools = ['table:rowselect']
+    tools = ['table:rowselect', 'table:to3d']
 
     def __init__(self, session, state=None, parent=None, widget=None):
 
