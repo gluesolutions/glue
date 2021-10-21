@@ -86,7 +86,6 @@ class InterpolateOnto3DDialog(QtWidgets.QDialog):
 
     def _apply(self):
 
-        print("I made it into _apply")
         try:
             tck = self.state.data.meta['interp_function']
         except KeyError:

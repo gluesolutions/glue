@@ -1789,6 +1789,8 @@ class FloodFillSubsetState(MaskSubsetState):
                    context.object(rec['threshold']))
 
 
+
+
 class RoiSubsetState3d(RoiSubsetStateNd):
     """
     A subset defined as the set of points in three dimensions that lie inside
@@ -1870,6 +1872,60 @@ class RoiSubsetState3d(RoiSubsetStateNd):
                                 context.object(rec['yatt']),
                                 context.object(rec['zatt']),
                                 context.object(rec['roi']),
+                                context.object(pretrans))
+
+class RoiSubsetState3dGenome(RoiSubsetState3d):
+    """
+    A subset defined from a 3D genome model
+    
+    Adds the data necessary for a to_genome_range function
+    """
+    
+    @contract(xatt='isinstance(ComponentID)', yatt='isinstance(ComponentID)', zatt='isinstance(ComponentID)')
+    def __init__(self, xatt=None, yatt=None, zatt=None, roi=None, genome_ranges=None, pretransform=None):
+        self.genome_ranges = genome_ranges
+        super(RoiSubsetState3dGenome, self).__init__(xatt=xatt, yatt=yatt, zatt=zatt, roi=roi, pretransform=pretransform)
+
+    @contract(data='issubclass(GenomicData)')
+    def to_genome_range(self):
+        """
+        Convert this SubsetState to a GenomicRangeSubsetState
+        """
+        from glue_genomics_viewers.subsets import GenomicRangeSubsetState, GenomicMulitRangeSubsetState #To avoid circular import
+        genome_states = []
+        for chr,start,end in self.genome_ranges:
+            genome_states.append(GenomicRangeSubsetState(chr, start, end))
+        if len(genome_states) == 1: #Special case but not really necessary...
+            return genome_states[0]
+        else:
+            return GenomicMulitRangeSubsetState(genome_states)
+
+    def copy(self):
+        result = RoiSubsetState3dGenome()
+        result.xatt = self.xatt
+        result.yatt = self.yatt
+        result.zatt = self.zatt
+        result.roi = self.roi
+        result.genome_ranges = self.genome_ranges
+        result.pretransform = self.pretransform
+        return result
+    
+    def __gluestate__(self, context):
+        return dict(xatt=context.id(self.xatt),
+                    yatt=context.id(self.yatt),
+                    zatt=context.id(self.zatt),
+                    roi=context.id(self.roi),
+                    genome_ranges=context.id(self.genome_ranges),
+                    pretransform=context.id(self.pretransform))
+    
+    @classmethod
+    def __setgluestate__(cls, rec, context):
+        pretrans = rec['pretransform'] if 'pretransform' in rec else None
+        return RoiSubsetState3dGenome(context.object(rec['xatt']),
+                                context.object(rec['yatt']),
+                                context.object(rec['zatt']),
+                                context.object(rec['roi']),
+                                context.object(rec['genome_ranges']),
                                 context.object(pretrans))
 
 
