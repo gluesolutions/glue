@@ -703,6 +703,7 @@ class CategoricalROISubsetState(SubsetState):
     def to_mask(self, data, view=None):
         x = data[self.att, view]
         result = self.roi.contains(x, None)
+        #import ipdb; ipdb.set_trace()
         assert x.shape == result.shape
         return result
 

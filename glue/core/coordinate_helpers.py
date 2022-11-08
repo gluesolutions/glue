@@ -32,7 +32,6 @@ def pixel2world_single_axis(wcs, *pixel, world_axis=None):
     world : :class:`~numpy.ndarray`
         The world coordinates for the requested axis.
     """
-
     if world_axis is None:
         raise ValueError("world_axis needs to be set")
 
@@ -51,6 +50,7 @@ def pixel2world_single_axis(wcs, *pixel, world_axis=None):
             pixel_new.append(unbroadcast(p))
         else:
             pixel_new.append(p.flat[0])
+
     pixel = np.broadcast_arrays(*pixel_new)
 
     result = wcs.pixel_to_world_values(*pixel)
