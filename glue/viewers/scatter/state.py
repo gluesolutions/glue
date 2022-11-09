@@ -246,6 +246,10 @@ class ScatterLayerState(MatplotlibLayerState):
     linewidth = DDCProperty(1, docstring="The line width")
     linestyle = DDSCProperty(docstring="The line style")
 
+    # Annotations
+
+    annotations_visible = DDCProperty(True, docstring="Whether to show direct annotations")
+
     # Errorbars
 
     xerr_visible = DDCProperty(False, docstring="Whether to show x error bars")
