@@ -24,7 +24,7 @@ STRETCHES = {'linear': LinearStretch,
              'arcsinh': AsinhStretch,
              'log': LogStretch}
 
-CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap'])
+CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap', 'annotations_visible'])
 MARKER_PROPERTIES = set(['size_mode', 'size_att', 'size_vmin', 'size_vmax', 'size_scaling', 'size', 'fill'])
 LINE_PROPERTIES = set(['linewidth', 'linestyle'])
 DENSITY_PROPERTIES = set(['dpi', 'stretch', 'density_contrast'])
@@ -34,7 +34,7 @@ VISUAL_PROPERTIES = (CMAP_PROPERTIES | MARKER_PROPERTIES | DENSITY_PROPERTIES |
 DATA_PROPERTIES = set(['layer', 'x_att', 'y_att', 'cmap_mode', 'size_mode', 'density_map',
                        'xerr_att', 'yerr_att', 'xerr_visible', 'yerr_visible',
                        'vector_visible', 'vx_att', 'vy_att', 'vector_arrowhead', 'vector_mode',
-                       'vector_origin', 'line_visible', 'markers_visible', 'vector_scaling', 'annotations_visible'])
+                       'vector_origin', 'line_visible', 'markers_visible', 'vector_scaling'])
 
 
 def ravel_artists(errorbar_artist):
@@ -509,9 +509,15 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                             y_cat_median = np.median(y[c==cat])
                             text = self.axes.text(x_cat_median, y_cat_median, labels[i], 
                                                   color=self.state.cmap.colors[i], 
-                                                  bbox=dict(facecolor='white', alpha=0.7, 
+                                                  bbox=dict(facecolor='white', alpha=0.85, 
                                                             boxstyle='Round', edgecolor=None))
                             self.annotations.append(text)
+        else:
+            if len(self.annotations) > 0:
+                for annot in self.annotations:
+                    annot.remove()
+                self.annotations = []
+
 
         if self.state.annotations_visible and len(self.annotations) > 0:
             for annotation in self.annotations:

@@ -248,7 +248,7 @@ class ScatterLayerState(MatplotlibLayerState):
 
     # Annotations
 
-    annotations_visible = DDCProperty(True, docstring="Whether to show direct annotations")
+    annotations_visible = DDCProperty(False, docstring="Whether to show direct annotations")
 
     # Errorbars
 
