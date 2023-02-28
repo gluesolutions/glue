@@ -215,6 +215,7 @@ class ScatterLayerStyleEditor(QtWidgets.QWidget):
             self.ui.button_flip_cmap.hide()
             self.ui.combodata_cmap.hide()
             self.ui.label_colormap.hide()
+            self.ui.bool_annotations_visible.hide()
             self.ui.color_color.show()
         else:
             self.ui.label_cmap_attribute.show()
@@ -225,4 +226,5 @@ class ScatterLayerStyleEditor(QtWidgets.QWidget):
             self.ui.button_flip_cmap.show()
             self.ui.combodata_cmap.show()
             self.ui.label_colormap.show()
+            self.ui.bool_annotations_visible.show()
             self.ui.color_color.hide()

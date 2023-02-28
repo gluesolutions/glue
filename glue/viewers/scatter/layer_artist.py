@@ -1,6 +1,7 @@
 import warnings
 import numpy as np
 
+import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 from matplotlib.collections import LineCollection
 
@@ -14,6 +15,7 @@ from glue.viewers.scatter.state import ScatterLayerState
 from glue.viewers.scatter.python_export import python_export_scatter_layer
 from glue.viewers.matplotlib.layer_artist import MatplotlibLayerArtist
 from glue.core.exceptions import IncompatibleAttribute
+from glue.core import BaseData
 
 from matplotlib.lines import Line2D
 
@@ -23,7 +25,7 @@ STRETCHES = {'linear': LinearStretch,
              'arcsinh': AsinhStretch,
              'log': LogStretch}
 
-CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap'])
+CMAP_PROPERTIES = set(['cmap_mode', 'cmap_att', 'cmap_vmin', 'cmap_vmax', 'cmap', 'annotations_visible'])
 MARKER_PROPERTIES = set(['size_mode', 'size_att', 'size_vmin', 'size_vmax', 'size_scaling', 'size', 'fill'])
 LINE_PROPERTIES = set(['linewidth', 'linestyle'])
 DENSITY_PROPERTIES = set(['dpi', 'stretch', 'density_contrast'])
@@ -149,6 +151,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self._set_axes(axes)
         self.errorbar_index = 2
         self.vector_index = 3
+        self.annotations_index = 6
 
         # NOTE: Matplotlib can't deal with NaN values in errorbar correctly, so
         # we need to prefilter values - the following variable is used to store
@@ -162,6 +165,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.plot_artist = self.axes.plot([], [], 'o', mec='none')[0]
         self.errorbar_artist = self.axes.errorbar([], [], fmt='none')
         self.vector_artist = None
+        self.annotations = []
         self.line_collection = ColoredLineCollection([], [])
         self.axes.add_collection(self.line_collection)
         with warnings.catch_warnings():
@@ -175,7 +179,8 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.axes.add_artist(self.density_artist)
         self.mpl_artists = [self.scatter_artist, self.plot_artist,
                             self.errorbar_artist, self.vector_artist,
-                            self.line_collection, self.density_artist]
+                            self.line_collection, self.density_artist,
+                            self.annotations]
 
     def compute_density_map(self, *args, **kwargs):
         try:
@@ -478,6 +483,47 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
                 if force or 'zorder' in changed:
                     eartist.set_zorder(self.state.zorder)
+        
+        # We allow direct labels whenever the user has chosen
+        # a categorical/listed colormap (probably a better way to determine this)
+        if self.state.annotations_visible:
+            if isinstance(self.layer, BaseData):
+                x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
+                y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
+
+                if len(self.annotations) > 0:
+                    for annot in self.annotations:
+                        annot.remove()
+                    self.annotations = []
+                if self.state.cmap_att is not None:
+                    try:
+                        test_color = self.state.cmap.colors[0]
+                    except (TypeError, AttributeError):
+                        test_color = None
+                        print("got a TypeError or AttributeError")
+                    if test_color:
+                        c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
+                        labels = np.unique(self.layer[self.state.cmap_att].ravel())
+
+                        for i,cat in enumerate(np.unique(c)):
+                            x_cat_median = np.median(x[c==cat])
+                            y_cat_median = np.median(y[c==cat])
+                            text = self.axes.text(x_cat_median, y_cat_median, labels[i], 
+                                                  color=self.state.cmap.colors[i], 
+                                                  bbox=dict(facecolor='white', alpha=0.85, 
+                                                            boxstyle='Round', edgecolor=None))
+                            self.annotations.append(text)
+        else:
+            if len(self.annotations) > 0:
+                for annot in self.annotations:
+                    annot.remove()
+                self.annotations = []
+
+        if self.state.annotations_visible and len(self.annotations) > 0:
+            for annotation in self.annotations:
+                if force or 'zorder' in changed:
+                    annotation.set_zorder(self.state.zorder)
+                annotation.set_visible(self.state.visible)
 
         for artist in [self.scatter_artist, self.plot_artist,
                        self.vector_artist, self.line_collection,
