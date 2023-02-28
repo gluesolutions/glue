@@ -5,7 +5,7 @@ from fractions import Fraction
 
 import numpy as np
 
-from matplotlib.ticker import AutoLocator, MaxNLocator, LogLocator
+from matplotlib.ticker import AutoLocator, MaxNLocator, LogLocator, FixedLocator
 from matplotlib.ticker import LogFormatterMathtext, ScalarFormatter, FuncFormatter
 from matplotlib.dates import AutoDateLocator, AutoDateFormatter
 from matplotlib.projections.polar import ThetaFormatter, ThetaLocator
@@ -497,8 +497,8 @@ def update_ticks(axes, coord, kinds, is_log, categories, projection='rectilinear
         axis.set_major_locator(LogLocator())
         axis.set_major_formatter(LogFormatterMathtext())
     elif is_cat:
-        locator = MaxNLocator(10, integer=True)
-        locator.view_limits(0, categories.shape[0])
+        max_num_cats = min(categories.shape[0], 20) # Generally want to plot all categories
+        locator = FixedLocator(range(categories.shape[0]),nbins=max_num_cats)
         format_func = partial(tick_linker, categories)
         formatter = FuncFormatter(format_func)
         axis.set_major_locator(locator)
