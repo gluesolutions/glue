@@ -267,6 +267,9 @@ class ScatterLayerState(MatplotlibLayerState):
 
     annotations_visible = DDCProperty(False, docstring="Whether to show direct annotations")
 
+    # Regions
+    fixed_data_size = DDCProperty(True, docstring="Whether to show sizes of points in data units")
+
     def __init__(self, viewer_state=None, layer=None, **kwargs):
 
         super(ScatterLayerState, self).__init__(viewer_state=viewer_state, layer=layer)
@@ -357,6 +360,7 @@ class ScatterLayerState(MatplotlibLayerState):
 
         self._sync_size = keep_in_sync(self, 'size', self.layer.style, 'markersize')
 
+        self.fixed_data_size = True
         self.update_from_dict(kwargs)
 
     def _update_points_mode(self, *args):

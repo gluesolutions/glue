@@ -131,7 +131,6 @@ def plot_colored_line(ax, x, y, c=None, cmap=None, vmin=None, vmax=None, **kwarg
     ax.add_collection(lc)
     return lc
 
-
 class UpdatablePatchCollection(PatchCollection):
     """
     I'm not sure if we generally need this, it depends what properties of polygons
@@ -147,6 +146,29 @@ class UpdatablePatchCollection(PatchCollection):
     def get_paths(self):
         self.set_paths(self.patches)
         return self._paths
+
+class UpdatableCircleCollection(UpdatablePatchCollection):
+
+    def set_centers(self, x, y):
+        if len(x) == 0:
+            self.patches = []
+            return
+        circles = [Circle((xi,yi)) for xi,yi in zip(x,y)]
+        self.patches = circles
+#patch.set_center = (xi, yi)
+    
+    def set_colors(self, colors):
+        if len(colors) == 0:
+            return
+        for patch,ci in zip(self.patches, colors):
+            patch.set_color(ci)
+
+    def set_radius(self, radii):
+        new_radii = [radii for x in self.patches]
+        for patch,radius in zip(self.patches, new_radii):
+            print(radius)
+            patch.set_radius(radius)
+
 
 
 class ScatterLayerArtist(MatplotlibLayerArtist):
@@ -186,7 +208,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.vector_artist = None
         self.annotations = []
         self.line_collection = ColoredLineCollection([], [])
-        self.region_collection = UpdatablePatchCollection([])
+        self.region_collection = UpdatableCircleCollection([])
         self.axes.add_collection(self.line_collection)
         self.axes.add_collection(self.region_collection)
 
@@ -248,10 +270,10 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
             self.enable()
 
 
-        display_regions = True
-        if display_regions:
-            circles = [Circle((xi,yi), radius=10, linewidth=2, color='blue') for xi,yi in zip(x,y)]
-            self.mpl_artists[self.regions_index].patches = circles
+        #display_regions = True
+        #if display_regions:
+        #    circles = [Circle((xi,yi)) for xi,yi in zip(x,y)]
+        #   self.mpl_artists[self.regions_index].patches = circles
 
         if self.state.markers_visible:
 
@@ -275,13 +297,20 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                 if self._use_plot_artist():
                     # In this case we use Matplotlib's plot function because it has much
                     # better performance than scatter.
-                    self.plot_artist.set_data(x, y)
+                    if self.state.fixed_data_size:
+                        self.mpl_artists[self.regions_index].set_centers(x, y)
+                    else:
+                        self.plot_artist.set_data(x, y)
                 else:
-                    offsets = np.vstack((x, y)).transpose()
-                    self.scatter_artist.set_offsets(offsets)
+                    if self.state.fixed_data_size:
+                        self.mpl_artists[self.regions_index].set_centers(x, y)
+                    else:
+                        offsets = np.vstack((x, y)).transpose()
+                        self.scatter_artist.set_offsets(offsets)
         else:
             self.plot_artist.set_data([], [])
             self.scatter_artist.set_offsets(np.zeros((0, 2)))
+            self.mpl_artists[self.regions_index].set_centers([], [])
 
         if self.state.line_visible:
             if self.state.cmap_mode == 'Fixed':
@@ -425,6 +454,9 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
                     if self.state.cmap_mode == 'Fixed':
                         if force or 'color' in changed or 'cmap_mode' in changed or 'fill' in changed:
+                            if self.state.fixed_data_size:
+                                self.mpl_artists[self.regions_index].set(color=self.state.color)
+
                             self.scatter_artist.set_array(None)
                             if self.state.fill:
                                 self.scatter_artist.set_facecolors(self.state.color)
@@ -433,20 +465,25 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                                 self.scatter_artist.set_facecolors('none')
                                 self.scatter_artist.set_edgecolors(self.state.color)
                     elif force or any(prop in changed for prop in CMAP_PROPERTIES) or 'fill' in changed:
-                        self.scatter_artist.set_edgecolors(None)
-                        self.scatter_artist.set_facecolors(None)
-                        c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
-                        set_mpl_artist_cmap(self.scatter_artist, c, self.state)
-                        if self.state.fill:
-                            self.scatter_artist.set_edgecolors('none')
+                        if self.state.fixed_data_size:
+                            c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
+                            set_mpl_artist_cmap(self.mpl_artists[self.regions_index], c, self.state)
                         else:
-                            self.scatter_artist.set_facecolors('none')
+                            self.scatter_artist.set_edgecolors(None)
+                            self.scatter_artist.set_facecolors(None)
+                            c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
+                            set_mpl_artist_cmap(self.scatter_artist, c, self.state)
+                            if self.state.fill:
+                                self.scatter_artist.set_edgecolors('none')
+                            else:
+                                self.scatter_artist.set_facecolors('none')
 
                     if force or any(prop in changed for prop in MARKER_PROPERTIES):
 
                         if self.state.size_mode == 'Fixed':
                             s = self.state.size * self.state.size_scaling
                             s = np.broadcast_to(s, self.scatter_artist.get_sizes().shape)
+
                         else:
                             s = ensure_numerical(self.layer[self.state.size_att].ravel())
                             s = ((s - self.state.size_vmin) /
@@ -460,7 +497,10 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
                         # Note, we need to square here because for scatter, s is actually
                         # proportional to the marker area, not radius.
-                        self.scatter_artist.set_sizes(s ** 2)
+                        if self.state.fixed_data_size:
+                            self.mpl_artists[self.regions_index].set_radius(s)
+                        else:
+                            self.scatter_artist.set_sizes(s ** 2)
 
         if self.state.line_visible:
 
@@ -555,7 +595,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
         for artist in [self.scatter_artist, self.plot_artist,
                        self.vector_artist, self.line_collection,
-                       self.density_artist]:
+                       self.density_artist, self.region_collection]:
 
             if artist is None:
                 continue
@@ -656,6 +696,6 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
             return None, None, None
 
     def _use_plot_artist(self):
-        res = self.state.cmap_mode == 'Fixed' and self.state.size_mode == 'Fixed'
+        res = self.state.cmap_mode == 'Fixed' and self.state.size_mode == 'Fixed' and not self.state.fixed_data_size
         return res and (not hasattr(self._viewer_state, 'plot_mode') or
                         not self._viewer_state.plot_mode == 'polar')
