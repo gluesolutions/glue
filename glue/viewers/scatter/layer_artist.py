@@ -3,7 +3,8 @@ import numpy as np
 
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PatchCollection
+from matplotlib.patches import Circle
 
 from mpl_scatter_density.generic_density_artist import GenericDensityArtist
 
@@ -131,6 +132,23 @@ def plot_colored_line(ax, x, y, c=None, cmap=None, vmin=None, vmax=None, **kwarg
     return lc
 
 
+class UpdatablePatchCollection(PatchCollection):
+    """
+    I'm not sure if we generally need this, it depends what properties of polygons
+    we're going to need to update.
+
+    For circles we might be able to just set_radius
+    Taken from https://stackoverflow.com/a/11041426
+    """
+    def __init__(self, patches, *args, **kwargs):
+        self.patches = patches
+        PatchCollection.__init__(self, patches, *args, **kwargs)
+
+    def get_paths(self):
+        self.set_paths(self.patches)
+        return self._paths
+
+
 class ScatterLayerArtist(MatplotlibLayerArtist):
 
     _layer_state_cls = ScatterLayerState
@@ -152,6 +170,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.errorbar_index = 2
         self.vector_index = 3
         self.annotations_index = 6
+        self.regions_index = 7
 
         # NOTE: Matplotlib can't deal with NaN values in errorbar correctly, so
         # we need to prefilter values - the following variable is used to store
@@ -167,7 +186,10 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.vector_artist = None
         self.annotations = []
         self.line_collection = ColoredLineCollection([], [])
+        self.region_collection = UpdatablePatchCollection([])
         self.axes.add_collection(self.line_collection)
+        self.axes.add_collection(self.region_collection)
+
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message='All-NaN slice encountered')
             self.density_artist = GenericDensityArtist(self.axes, color='white',
@@ -180,7 +202,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
         self.mpl_artists = [self.scatter_artist, self.plot_artist,
                             self.errorbar_artist, self.vector_artist,
                             self.line_collection, self.density_artist,
-                            self.annotations]
+                            self.annotations, self.region_collection]
 
     def compute_density_map(self, *args, **kwargs):
         try:
@@ -224,6 +246,12 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
             return
         else:
             self.enable()
+
+
+        display_regions = True
+        if display_regions:
+            circles = [Circle((xi,yi), radius=10, linewidth=2, color='blue') for xi,yi in zip(x,y)]
+            self.mpl_artists[self.regions_index].patches = circles
 
         if self.state.markers_visible:
 
