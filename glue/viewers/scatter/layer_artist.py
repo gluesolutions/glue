@@ -294,7 +294,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                     # better performance than scatter.
                     self.plot_artist.set_data(x, y)
                 else:
-                    if self.state.size_mode == 'Data Units':
+                    if self.state.size_mode == 'Data':
                         self.region_collection.set_centers(x, y)
                         self.scatter_artist.set_offsets(np.zeros((0, 2)))
                     else:
@@ -448,7 +448,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
                     if self.state.cmap_mode == 'Fixed':
                         if force or 'color' in changed or 'cmap_mode' in changed or 'fill' in changed:
-                            if self.state.size_mode == 'Data Units':
+                            if self.state.size_mode == 'Data':
                                 self.mpl_artists[self.regions_index].set(color=self.state.color)
 
                             self.scatter_artist.set_array(None)
@@ -459,7 +459,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                                 self.scatter_artist.set_facecolors('none')
                                 self.scatter_artist.set_edgecolors(self.state.color)
                     elif force or any(prop in changed for prop in CMAP_PROPERTIES) or 'fill' in changed:
-                        if self.state.size_mode == 'Data Units':
+                        if self.state.size_mode == 'Data':
                             c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
                             set_mpl_artist_cmap(self.region_collection, c, self.state)
                         else:
@@ -481,7 +481,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                             # proportional to the marker area, not radius.
                             self.scatter_artist.set_sizes(s ** 2)
 
-                        elif self.state.size_mode == 'Data Units':
+                        elif self.state.size_mode == 'Data':
                             s = self.state.size
                             self.mpl_artists[self.regions_index].set_radius(s)
 
@@ -696,6 +696,6 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
             return None, None, None
 
     def _use_plot_artist(self):
-        res = self.state.cmap_mode == 'Fixed' and self.state.size_mode == 'Fixed' and not self.state.size_mode == 'Data Units'
+        res = self.state.cmap_mode == 'Fixed' and self.state.size_mode == 'Fixed' and not self.state.size_mode == 'Data'
         return res and (not hasattr(self._viewer_state, 'plot_mode') or
                         not self._viewer_state.plot_mode == 'polar')

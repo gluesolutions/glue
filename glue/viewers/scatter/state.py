@@ -312,7 +312,7 @@ class ScatterLayerState(MatplotlibLayerState):
         self.add_callback('density_map', self._on_density_map_change, priority=10000)
 
         ScatterLayerState.cmap_mode.set_choices(self, ['Fixed', 'Linear'])
-        ScatterLayerState.size_mode.set_choices(self, ['Fixed', 'Linear', 'Data Units'])
+        ScatterLayerState.size_mode.set_choices(self, ['Fixed', 'Linear', 'Data'])
 
         linestyle_display = {'solid': '–––––––',
                              'dashed': '– – – – –',
