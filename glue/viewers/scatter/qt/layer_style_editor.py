@@ -106,7 +106,7 @@ class ScatterLayerStyleEditor(QtWidgets.QWidget):
 
     def _update_size_mode(self, size_mode=None):
 
-        visible = not self.layer_state.density_map and not self.layer_state.size_mode == 'Fixed'
+        visible = not self.layer_state.density_map and self.layer_state.size_mode == 'Linear'
         self.ui.label_size_attribute.setVisible(visible)
         self.ui.combosel_size_att.setVisible(visible)
         self.ui.label_size_limits.setVisible(visible)
@@ -114,7 +114,7 @@ class ScatterLayerStyleEditor(QtWidgets.QWidget):
         self.ui.valuetext_size_vmax.setVisible(visible)
         self.ui.button_flip_size.setVisible(visible)
 
-        visible = not self.layer_state.density_map and self.layer_state.size_mode == 'Fixed'
+        visible = not self.layer_state.density_map and not self.layer_state.size_mode == 'Linear'
         self.ui.value_size.setVisible(visible)
 
         density = self.layer_state.density_map
@@ -130,6 +130,8 @@ class ScatterLayerStyleEditor(QtWidgets.QWidget):
         self.ui.label_size_scaling.setVisible(not density)
         self.ui.label_fill.setVisible(not density)
         self.ui.bool_fill.setVisible(not density)
+
+        #data_units = self.layer_state.size_mode == 'Data Units'
 
     def _update_markers_visible(self, *args):
         self.ui.combosel_size_mode.setEnabled(self.layer_state.markers_visible)
