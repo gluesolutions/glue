@@ -21,7 +21,7 @@ from glue.core.message import (ComponentsChangedMessage,
                                PixelAlignedDataChangedMessage)
 from glue.viewers.image.frb_artist import imshow
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
-
+from glue_genes.glue_genomics_data.multires_data import MultiResolutionData
 
 class BaseImageLayerArtist(MatplotlibLayerArtist, HubListener):
 
@@ -235,27 +235,71 @@ class ImageSubsetArray(object):
 
     def __call__(self, bounds):
 
+        self.small_shape = [2,2]
+
         if (self.layer_artist is None or
                 self.layer_state is None or
                 self.viewer_state is None):
-            return np.broadcast_to(np.nan, self.shape)
+            return np.broadcast_to(np.nan, self.small_shape)
 
         # We should compute the mask even if the layer is not visible as we need
         # the layer to show up properly when it is made visible (which doesn't
         # trigger __getitem__)
 
+        # We get these large numpy arrays that, when added to base_image_artist
+        # blow up memory usage
+        # base_image_artist.py(190)make_image()
+        # -> self.set_data(array)
+        # I have hacked this to use self.small_shape instead, but does this
+        # break anything?
+
+        # So I think this is the heart of everything 
+        # and that this thing gets called every time we 
+        # make a pan/zoom. So if we had the same logic to find 
+        # the right coordinates here we would be golden?
+        # Although bounds here are guaranteed? to be ((xmin, max, xsteps), (ymin, ymax, ysteps))
+
+        # This is logic that applies only to MultiResolutionData
+#        if isinstance(self.viewer_state.reference_data, MultiResolutionData):
+#            print(f"Initial {bounds=}")
+#            #import pdb; pdb.set_trace()#
+#
+#            self.data = self.viewer_state.reference_data
+#            y = bounds[1]
+#            x = bounds[0]#
+#
+#            x_res = abs(x[1] - x[0]) / x[2]
+#            x_res_mask = np.ma.masked_greater(self.data._resolutions, x_res)
+#            xx = np.ma.argmax(x_res_mask)
+#            y_res = abs(y[1] - y[0]) / y[2]
+#            y_res_mask = np.ma.masked_greater(self.data._resolutions, y_res)
+#            yy = np.ma.argmax(y_res_mask)
+#            print(f"{xx=}")
+#            print(f"{yy=}")
+#            b = min(xx, yy)  # Use the highest resolution needed for either x or y
+#            for r in range(b):  # for each reduction we resize full_view by 2
+#                # TODO: Simplify this logic for different number of dimensions
+#                old_x, old_y = bounds
+#                bounds = [
+#                    (old_x[0] / 2, old_x[1] / 2, max(1, int(old_x[2]))),
+#                    (old_y[0] / 2, old_y[1] / 2, max(1, int(old_y[2]))),
+#                ]
+#            print(f"Final {bounds=}")
+
         try:
             mask = self.layer_state.get_sliced_data(bounds=bounds)
+            #print(f"{mask=}")
+            #print(f"{mask.shape=}")
+
         except IncompatibleAttribute:
             self.layer_artist.disable_incompatible_subset()
-            return np.broadcast_to(np.nan, self.shape)
+            return np.broadcast_to(np.nan, self.small_shape)
         else:
             self.layer_artist.enable(redraw=False)
 
         r, g, b = color2rgb(self.layer_state.color)
         mask = np.dstack((r * mask, g * mask, b * mask, mask * .5))
         mask = (255 * mask).astype(np.uint8)
-
         return mask
 
     @property
