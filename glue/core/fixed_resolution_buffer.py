@@ -95,8 +95,7 @@ def bounds_for_cache(bounds, dimensions):
 
 
 def compute_fixed_resolution_buffer(data, bounds, target_data=None, target_cid=None,
-                                    subset_state=None, broadcast=True, cache_id=None,
-                                    no_fancy_index=False):
+                                    subset_state=None, broadcast=True, cache_id=None):
     """
     Get a fixed-resolution buffer for a dataset.
 
@@ -122,11 +121,6 @@ def compute_fixed_resolution_buffer(data, bounds, target_data=None, target_cid=N
         is not a scalar does not affect any of the dimensions in ``data``,
         then the final array will be effectively broadcast along this
         dimension, otherwise an error will be raised.
-    no_fancy_index bool, optional
-        If `True` then enforce using the logic to extract a sub-region
-        of the array rather than using fancy indexing. This is useful
-        for applying subset states to custom `~glue.core.Data` objects
-        with DaskComponents.
     """
 
     if target_data is None:
@@ -251,10 +245,13 @@ def compute_fixed_resolution_buffer(data, bounds, target_data=None, target_cid=N
     # from the data before applying fancy indexing if the data is a dask
     # array. This won't be very efficient when dealing with 3d fixed
     # resolution buffers, but it will at least work as opposed to not.
-    
+    # Since subset definitions can be pretty arbitrary, we do not rely
+    # on fancy indexing if the target dataset has any DaskComponents
+    # when we apply subset_state.
+
     target_cid_is_dask = target_cid is not None and isinstance(data, Data) and isinstance(data.get_component(target_cid), DaskComponent)
-    #subset_over_dask_data = subset_state is not None and any([isinstance(data.get_component(comp), DaskComponent) for comp in data.main_components])
-    if target_cid_is_dask or no_fancy_index:
+    subset_over_dask_data = subset_state is not None and any([isinstance(data.get_component(comp), DaskComponent) for comp in data.main_components])
+    if target_cid_is_dask or subset_over_dask_data:
 
         # Extract sub-region of data first, then fetch exact coordinate values
         subregion = tuple([slice(np.nanmin(coord), np.nanmax(coord) + 1) for coord in translated_coords])
