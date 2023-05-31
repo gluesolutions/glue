@@ -1984,11 +1984,11 @@ class Data(BaseCartesianData):
         # the histogram calculation to dask.
         if DASK_INSTALLED:
             if isinstance(x, da.Array):
-                x = x.compute()
+                x = np.asarray(x.compute())
             if ndim > 1 and isinstance(y, da.Array):
-                y = y.compute()
+                y = np.asarray(y.compute())
             if isinstance(w, da.Array):
-                w = w.compute()
+                w = np.asarray(w.compute())
 
         if len(x) == 0:
             return np.zeros(bins)
