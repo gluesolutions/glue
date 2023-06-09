@@ -187,7 +187,10 @@ class DataTableModel(QtCore.QAbstractTableModel):
                     return
 
         # If not then we need to show only the rows with visible subsets
-        visible = np.zeros(self.order.shape, dtype=bool)
+        if self.filter_mask is None:
+            visible = np.zeros(self.order.shape, dtype=bool)
+        else:
+            visible = self.filter_mask[self.order]
         for layer_artist in self._table_viewer.layers:
             if layer_artist.visible:
                 mask = layer_artist.layer.to_mask()[self.order]
@@ -269,7 +272,10 @@ class TableViewer(DataViewer):
     _state_cls = TableViewerState
 
     inherit_tools = False
-    tools = ['table:rowselect']
+    tools = ['table:rowselect', 'window']
+    subtools = {
+        'window': ['window:movetab', 'window:title']
+    }
 
     def __init__(self, session, state=None, parent=None, widget=None):
 
@@ -376,7 +382,9 @@ class TableViewer(DataViewer):
 
     @property
     def window_title(self):
-        if len(self.state.layers) > 0:
+        if self.state.title:
+            return self.state.title
+        elif len(self.state.layers) > 0:
             return 'Table: ' + self.state.layers[0].layer.label
         else:
             return 'Table'
