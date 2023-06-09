@@ -8,7 +8,7 @@ import sys
 
 import importlib.metadata
 
-__version__ = importlib.metadata.version('glue-core')
+__version__ = importlib.metadata.version('glue-core-for-glue-genes')
 
 from ._mpl_backend import MatplotlibBackendSetter
 sys.meta_path.append(MatplotlibBackendSetter())

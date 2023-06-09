@@ -60,7 +60,7 @@ copyright = u'2012-2019, Chris Beaumont, Thomas Robitaille, Michelle Borkin'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = release = get_distribution('glue-core').version
+version = release = get_distribution('glue-core-for-glue-genes').version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
