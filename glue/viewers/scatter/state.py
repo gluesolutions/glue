@@ -548,6 +548,7 @@ class ScatterRegionLayerState(MatplotlibLayerState):
             self._on_layer_change()
 
         self.cmap = colormaps.members[0][1]
+
         self.add_callback('cmap_att', self._check_for_preferred_cmap)
         self.update_from_dict(kwargs)
 
