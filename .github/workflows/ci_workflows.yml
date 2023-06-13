@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - main
+    - glue-core-for-glue-genes
     tags:
     - '*'
   pull_request:
@@ -116,4 +117,4 @@ jobs:
       test_extras: 'test,qt'
       test_command: Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 & sleep 3; DISPLAY=:99.0 pytest --pyargs glue
     secrets:
-      pypi_token: ${{ secrets.pypi_token }}
+      pypi_token: ${{ secrets.pypi_api_token }}
