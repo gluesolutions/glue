@@ -112,10 +112,9 @@ class TestTranslationData:
 
         with pytest.raises(ValueError) as exc:
             data.get_object()
-        
+
         assert 'Specify the object class to use with cls' in exc.value.args[0]
         assert 'glue.core.tests.test_data_translation.FakeDataObject' in exc.value.args[0]
-
 
         obj = data.get_object(cls=FakeDataObject)
         assert isinstance(obj, FakeDataObject)
