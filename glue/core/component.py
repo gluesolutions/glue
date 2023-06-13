@@ -532,7 +532,7 @@ class ExtendedComponent(Component):
 
     Parameters
     ----------
-    data : :class:`~shapely.Geometry`
+    data : Array of Shapely objects
         The underlying array of Shapely geometries
     parent_components: `list`
         The list of regular components over which the Shapely geometries extend
