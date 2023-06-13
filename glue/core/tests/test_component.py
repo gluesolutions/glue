@@ -435,18 +435,7 @@ class TestExtendedComponent(object):
 
         representative_points = [s.representative_point() for s in polys]
 
-    def test_autodetection(self):
-        assert Component.autotyped(self.array_data).categorical
-        assert Component.autotyped(self.list_data).categorical
-
-        x = np.array([True, False, True, False])
-        assert not Component.autotyped(x).categorical
-
-        x = np.array([1, 2, 3, 4])
-        assert not Component.autotyped(x).categorical
-
-        x = np.array(['1', '2', '3', '4'])
-        assert not Component.autotyped(x).categorical
-
-        d = Data(x=['a', 'b', 'c'])
-        assert d.get_component('x').categorical
+    def test_basic_properties(self):
+        assert self.reg_comp_2d_poly.ndim == 1
+        assert self.reg_comp_2d_poly.shape == (3, )
+        assert self.reg_comp_2d_poly.extended
