@@ -47,12 +47,6 @@ jobs:
         - linux: py310-test-pyqt64-all
         - linux: py311-test-pyqt514
 
-        # Documentation build
-        - linux: py38-docs-pyqt514
-          coverage: false
-        - macos: py311-docs-pyqt64
-          coverage: false
-
         # Test a few configurations on macOS
         - macos: py38-test-pyqt514-all
         - macos: py310-test-pyqt515
