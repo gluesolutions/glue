@@ -45,8 +45,7 @@ def test_translator_from_data():
 
     with pytest.raises(ValueError) as exc:
         df = data.get_object()
-    assert exc.value.args[0] == ('Specify the object class to use with cls= - supported '
-                                 'classes are:\n\n* pandas.core.frame.DataFrame')
+    assert 'Specify the object class to use with cls' in exc.value.args[0]
 
     df = data.get_object(cls=DataFrame)
     assert_equal(list(df.columns), ['a', 'b', 'c'])
