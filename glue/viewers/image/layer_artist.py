@@ -21,7 +21,7 @@ from glue.core.message import (ComponentsChangedMessage,
                                PixelAlignedDataChangedMessage)
 from glue.viewers.image.frb_artist import imshow
 from glue.core.fixed_resolution_buffer import ARRAY_CACHE, PIXEL_CACHE
-from glue_genes.glue_genomics_data.multires_data import MultiResolutionData
+
 
 class BaseImageLayerArtist(MatplotlibLayerArtist, HubListener):
 
@@ -235,7 +235,7 @@ class ImageSubsetArray(object):
 
     def __call__(self, bounds):
 
-        self.small_shape = [2,2]
+        self.small_shape = [2, 2]
 
         if (self.layer_artist is None or
                 self.layer_state is None or
@@ -253,9 +253,9 @@ class ImageSubsetArray(object):
         # I have hacked this to use self.small_shape instead, but does this
         # break anything?
 
-        # So I think this is the heart of everything 
-        # and that this thing gets called every time we 
-        # make a pan/zoom. So if we had the same logic to find 
+        # So I think this is the heart of everything
+        # and that this thing gets called every time we
+        # make a pan/zoom. So if we had the same logic to find
         # the right coordinates here we would be golden?
         # Although bounds here are guaranteed? to be ((xmin, max, xsteps), (ymin, ymax, ysteps))
 
@@ -288,8 +288,6 @@ class ImageSubsetArray(object):
 
         try:
             mask = self.layer_state.get_sliced_data(bounds=bounds)
-            #print(f"{mask=}")
-            #print(f"{mask.shape=}")
 
         except IncompatibleAttribute:
             self.layer_artist.disable_incompatible_subset()
