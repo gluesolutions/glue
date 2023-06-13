@@ -71,7 +71,7 @@ jobs:
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
-      coverage: codecov
+      coverage: false
       display: true
       libraries: |
         apt:
