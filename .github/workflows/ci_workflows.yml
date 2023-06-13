@@ -23,7 +23,7 @@ jobs:
     needs: initial_checks
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
     with:
-      coverage: codecov
+      coverage: false
       display: true
       # Linux PyQt 5.15 and 6.x installations require apt-getting xcb and EGL deps
       # and headless X11 display; as of Python 3.11 Scipy and h5py also need their own deps.
