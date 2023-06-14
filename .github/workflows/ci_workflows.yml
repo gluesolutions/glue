@@ -61,47 +61,6 @@ jobs:
         - linux: py310-test-pyqt515-dev-all
         - linux: py311-test-pyqt64-dev
 
-  allowed_failures:
-    needs: initial_checks
-    uses: OpenAstronomy/github-actions-workflows/.github/workflows/tox.yml@v1
-    with:
-      coverage: false
-      display: true
-      libraries: |
-        apt:
-          - '^libxcb.*-dev'
-          - libxkbcommon-x11-dev
-          - libegl1-mesa
-          - libopenblas-dev
-          - libhdf5-dev
-        brew:
-          - enchant
-          - hdf5
-      envs: |
-
-        # Non-deterministic QThread exceptions
-        - linux: py38-test-pyside514
-        - linux: py39-test-pyside515
-        - linux: py310-test-pyside63
-
-        # PySide6 6.4 failures due to https://github.com/spyder-ide/qtpy/issues/373
-        # and https://github.com/matplotlib/matplotlib/issues/24155
-        # Python 3.11.0 failing on Windows in test_image.py on
-        # > assert df.find_factory(fname) is df.img_data
-        - linux: py310-test-pyside64
-        - linux: py311-test-pyside64
-        - macos: py310-test-pyside63
-        - macos: py311-test-pyside64
-        - windows: py310-test-pyside64
-        - windows: py311-test-pyqt515
-
-        # Windows docs build
-        - windows: py310-docs-pyqt515
-          coverage: false
-
-        # Failure in test_close_tab
-        - windows: py310-test-pyqt515-all
-
   publish:
     needs: tests
     uses: OpenAstronomy/github-actions-workflows/.github/workflows/publish_pure_python.yml@v1
