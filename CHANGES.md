@@ -1,5 +1,18 @@
 # Full changelog
 
+## v1.12.3 - 2023-06-14
+
+<!-- Release notes generated using configuration in .github/release.yml at glue-core-for-glue-genes -->
+### What's Changed
+
+#### Other Changes
+
+- OME-Zarr support by @jfoster17 in https://github.com/gluesolutions/glue/pull/14
+- Extended Component Support by @jfoster17 in https://github.com/gluesolutions/glue/pull/15
+- Spaceranger and MultiResolution support by @jfoster17 in https://github.com/gluesolutions/glue/pull/16
+
+**Full Changelog**: https://github.com/gluesolutions/glue/compare/v1.0.0...v1.12.3
+
 ## v1.11.0 - 2023-05-25
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
@@ -688,7 +701,9 @@
 - 
 - 
 - 
+- 
 - - `glue.viewers.common.viewer.BaseViewer` and
+- 
 - 
 - 
 - 
@@ -708,7 +723,9 @@
 - 
 - 
 - 
+- 
 - - 
+- 
 - 
 - 
 - 
@@ -728,7 +745,9 @@
 - 
 - 
 - 
+- 
 - - for using state classes in viewers (instead of
+- 
 - 
 - 
 - 
@@ -748,7 +767,9 @@
 - 
 - 
 - 
+- 
 - - 
+- 
 - 
 - 
 - 
@@ -768,7 +789,9 @@
 - 
 - 
 - 
+- 
 - - 
+- 
 - 
 - 
 - 
