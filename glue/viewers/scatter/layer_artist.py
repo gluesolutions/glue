@@ -358,8 +358,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
     @defer_draw
     def _update_visual_attributes(self, changed, force=False):
-        if 'cmap_mode' in changed:
-            import pdb; pdb.set_trace()
+
         if not self.enabled:
             return
 
@@ -497,7 +496,7 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
                 if force or 'zorder' in changed:
                     eartist.set_zorder(self.state.zorder)
-        
+
         # We allow direct labels whenever the user has chosen
         # a CategoricalComponent as the color component
         if self.state.annotations_visible and self.state.cmap_mode == 'Linear':
@@ -519,24 +518,24 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                         test_color = None
                         print("got a TypeError or AttributeError")
                         self.state.annotations_visible = False
-                    if test_color:                        
+                    if test_color:
 
                         def get_cmap_colors(cmap, vmin, vmax, n):
                             norm = Normalize(vmin, vmax)
                             sm = ScalarMappable(norm=norm, cmap=cmap)
                             return [sm.to_rgba(x) for x in range(n)]
 
-                        mapping = get_cmap_colors(self.state.cmap, 
-                                                  self.state.cmap_vmin, 
-                                                  self.state.cmap_vmax, 
+                        mapping = get_cmap_colors(self.state.cmap,
+                                                  self.state.cmap_vmin,
+                                                  self.state.cmap_vmax,
                                                   len(cats.categories))
-                        
-                        for i,label in enumerate(cats.categories):
-                            x_cat_median = np.median(x[cats.labels==label])
-                            y_cat_median = np.median(y[cats.labels==label])
-                            text = self.axes.text(x_cat_median, y_cat_median, label, 
-                                                  color=mapping[i], 
-                                                  bbox=dict(facecolor='white', alpha=0.85, 
+
+                        for i, label in enumerate(cats.categories):
+                            x_cat_median = np.median(x[cats.labels == label])
+                            y_cat_median = np.median(y[cats.labels == label])
+                            text = self.axes.text(x_cat_median, y_cat_median, label,
+                                                  color=mapping[i],
+                                                  bbox=dict(facecolor='white', alpha=0.85,
                                                             boxstyle='Round', edgecolor=None))
                             self.annotations.append(text)
                 else:
