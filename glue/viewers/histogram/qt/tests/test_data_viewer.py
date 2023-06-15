@@ -649,7 +649,7 @@ class TestHistogramViewer(object):
 
         self.viewer.figure.canvas.draw()
 
-        assert [x.get_text() for x in self.viewer.axes.xaxis.get_ticklabels()] == ['', 'a', 'b', 'c', '']
+        assert [x.get_text() for x in self.viewer.axes.xaxis.get_ticklabels()] == ['a', 'b', 'c']
 
         # Make sure that everything works fine after saving/reloading
         filename = tmpdir.join('test_categorical_labels.glu').strpath
@@ -662,7 +662,7 @@ class TestHistogramViewer(object):
 
         viewer.figure.canvas.draw()
 
-        assert [x.get_text() for x in viewer.axes.xaxis.get_ticklabels()] == ['', 'a', 'b', 'c', '']
+        assert [x.get_text() for x in viewer.axes.xaxis.get_ticklabels()] == ['a', 'b', 'c']
 
         ga.close()
 
