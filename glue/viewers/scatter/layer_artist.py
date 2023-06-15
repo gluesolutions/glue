@@ -1,9 +1,9 @@
 import warnings
 import numpy as np
 
-import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 from matplotlib.collections import LineCollection
+from matplotlib.cm import ScalarMappable
 
 from mpl_scatter_density.generic_density_artist import GenericDensityArtist
 
@@ -17,6 +17,7 @@ from glue.viewers.scatter.plot_polygons import UpdateableRegionCollection, get_g
 from glue.viewers.matplotlib.layer_artist import MatplotlibLayerArtist
 from glue.core.exceptions import IncompatibleAttribute
 from glue.core import BaseData
+from glue.core.component import CategoricalComponent
 from glue.core.link_manager import is_equivalent_cid
 
 from matplotlib.lines import Line2D
@@ -357,7 +358,8 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
 
     @defer_draw
     def _update_visual_attributes(self, changed, force=False):
-
+        if 'cmap_mode' in changed:
+            import pdb; pdb.set_trace()
         if not self.enabled:
             return
 
@@ -497,8 +499,8 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                     eartist.set_zorder(self.state.zorder)
         
         # We allow direct labels whenever the user has chosen
-        # a categorical/listed colormap (probably a better way to determine this)
-        if self.state.annotations_visible:
+        # a CategoricalComponent as the color component
+        if self.state.annotations_visible and self.state.cmap_mode == 'Linear':
             if isinstance(self.layer, BaseData):
                 x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
                 y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
@@ -508,23 +510,37 @@ class ScatterLayerArtist(MatplotlibLayerArtist):
                         annot.remove()
                     self.annotations = []
                 if self.state.cmap_att is not None:
+                    cats = self.layer.get_component(self.state.cmap_att)
+                    is_categorical = isinstance(cats, CategoricalComponent)
+                if is_categorical:
                     try:
                         test_color = self.state.cmap.colors[0]
                     except (TypeError, AttributeError):
                         test_color = None
                         print("got a TypeError or AttributeError")
-                    if test_color:
-                        c = ensure_numerical(self.layer[self.state.cmap_att].ravel())
-                        labels = np.unique(self.layer[self.state.cmap_att].ravel())
+                        self.state.annotations_visible = False
+                    if test_color:                        
 
-                        for i,cat in enumerate(np.unique(c)):
-                            x_cat_median = np.median(x[c==cat])
-                            y_cat_median = np.median(y[c==cat])
-                            text = self.axes.text(x_cat_median, y_cat_median, labels[i], 
-                                                  color=self.state.cmap.colors[i], 
+                        def get_cmap_colors(cmap, vmin, vmax, n):
+                            norm = Normalize(vmin, vmax)
+                            sm = ScalarMappable(norm=norm, cmap=cmap)
+                            return [sm.to_rgba(x) for x in range(n)]
+
+                        mapping = get_cmap_colors(self.state.cmap, 
+                                                  self.state.cmap_vmin, 
+                                                  self.state.cmap_vmax, 
+                                                  len(cats.categories))
+                        
+                        for i,label in enumerate(cats.categories):
+                            x_cat_median = np.median(x[cats.labels==label])
+                            y_cat_median = np.median(y[cats.labels==label])
+                            text = self.axes.text(x_cat_median, y_cat_median, label, 
+                                                  color=mapping[i], 
                                                   bbox=dict(facecolor='white', alpha=0.85, 
                                                             boxstyle='Round', edgecolor=None))
                             self.annotations.append(text)
+                else:
+                    self.state.annotations_visible = False
         else:
             if len(self.annotations) > 0:
                 for annot in self.annotations:
