@@ -1,5 +1,19 @@
 # Full changelog
 
+## v1.12.3 - 2023-06-14
+
+<!-- Release notes generated using configuration in .github/release.yml at glue-core-for-glue-genes -->
+### What's Changed
+
+- First full release of custom version of glue-core for glue genes
+
+#### Other Changes
+
+- OME-Zarr support by @jfoster17 in https://github.com/gluesolutions/glue/pull/14
+- Extended Component Support by @jfoster17 in https://github.com/gluesolutions/glue/pull/15
+- Spaceranger and MultiResolution support by @jfoster17 in https://github.com/gluesolutions/glue/pull/16
+
+
 ## v1.11.0 - 2023-05-25
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
