@@ -265,6 +265,23 @@ class ScatterRegionLayerStyleEditor(QtWidgets.QWidget):
         self.layer_state.add_callback('cmap_mode', self._update_cmap_mode)
 
         self._update_cmap_mode()
+        self.layer_state.add_callback('cmap_att', self._update_cmaps, priority=10000)
+
+    def _update_cmaps(self, *args):
+
+        with delay_callback(self.layer_state, 'cmap'):
+            if isinstance(self.layer_state.layer, BaseData):
+                layer = self.layer_state.layer
+            else:
+                layer = self.layer_state.layer.data
+
+            actual_component = layer.get_component(self.layer_state.cmap_att)
+            if getattr(actual_component, 'preferred_cmap', False):
+                cmap = actual_component.preferred_cmap
+                name = actual_component.cmap_name
+                self.ui.combodata_cmap.refresh_options(colormaps=[(name, cmap)])
+            else:
+                self.ui.combodata_cmap.refresh_options()
 
     def _update_cmap_mode(self, cmap_mode=None):
 
