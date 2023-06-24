@@ -1080,7 +1080,7 @@ LIGHT_RED = "#FB9A99"
 LIGHT_ORANGE = "#FDBF6F"
 LIGHT_PURPLE = "#CAB2D6"
 
-settings.add('SUBSET_COLORS', [BLUE, ORANGE, RED, GREEN, PURPLE, PINK, BROWN], validator=list)
+settings.add('SUBSET_COLORS', [RED, GREEN, BLUE, BROWN, ORANGE, PURPLE, PINK], validator=list)
 settings.add('DATA_COLOR', '#595959')
 settings.add('DATA_ALPHA', 0.8, validator=float)
 settings.add('BACKGROUND_COLOR', '#FFFFFF')
