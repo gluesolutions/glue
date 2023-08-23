@@ -711,7 +711,6 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
 
     @defer_draw
     def _update_data(self):
-
         # Layer artist has been cleared already
         if len(self.mpl_artists) == 0:
             return
@@ -824,7 +823,8 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
         # of updated properties is up to date after this method has been called.
         changed = self.pop_changed_properties()
 
-        change_from_limits = len(changed & LIMIT_PROPERTIES) > 0
+        full_sphere = getattr(self._viewer_state, 'using_full_sphere', False)
+        change_from_limits = full_sphere and len(changed & LIMIT_PROPERTIES) > 0
         if force or change_from_limits or len(changed & DATA_PROPERTIES) > 0:
             self._update_data()
             force = True
