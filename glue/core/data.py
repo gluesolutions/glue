@@ -31,6 +31,7 @@ from glue.utils import (compute_statistic, unbroadcast, iterate_chunks,
                         datetime64_to_mpl, categorical_ndarray,
                         format_choices, random_views_for_dask_array)
 from glue.core.coordinate_helpers import axis_label
+from glue.core.link_manager import is_equivalent_cid
 
 
 # Note: leave all the following imports for component and component_id since
@@ -2110,6 +2111,39 @@ class RegionData(Data):
                 self.check_extended_components()
         else:
             super().add_component(component, label)
+
+    def get_transform_to_cid(self, this_cid, other_cid):
+        """
+        Returns the conversion function that maps cid to the coordinates
+        that the ExtendedComponent are in (i.e. self.region_x_att and self.region_y_att)
+        """
+        func = None
+        link = self._get_external_link(other_cid)
+        if this_cid in link.get_from_ids():
+            func = link.get_using()
+        elif this_cid in link.get_to_ids():
+            func = link.get_inverse()
+        if func:
+            return func
+        else:
+            return None
+
+    def check_if_linked_cid(self, target_cids, other_cid):
+        """
+        Check if a ComponentID is in the set of components that regions are over.
+        """
+        for target_cid in target_cids:
+            if is_equivalent_cid(self, target_cid, other_cid):
+                return True
+        else:
+            link = self._get_external_link(other_cid)
+            if not link:
+                return False
+            for target_cid in target_cids:
+                if target_cid in link:
+                    return True
+            else:
+                return False
 
 
 @contract(i=int, ndim=int)

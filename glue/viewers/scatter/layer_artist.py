@@ -14,11 +14,11 @@ from glue.utils import defer_draw, ensure_numerical, datetime64_to_mpl
 from glue.viewers.scatter.state import ScatterLayerState, ScatterRegionLayerState
 from glue.viewers.scatter.python_export import python_export_scatter_layer
 from glue.viewers.scatter.plot_polygons import UpdateableRegionCollection, get_geometry_type, _sanitize_geoms, _PolygonPatch, transform_shapely
+from shapely.ops import transform
 from glue.viewers.matplotlib.layer_artist import MatplotlibLayerArtist
 from glue.core.exceptions import IncompatibleAttribute
 from glue.core import BaseData
 from glue.core.component import CategoricalComponent
-from glue.core.link_manager import is_equivalent_cid
 
 from matplotlib.lines import Line2D
 
@@ -677,6 +677,7 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
         else:
             data = layer.data
 
+        self.data = data
         self.region_att = data._extended_component_ids[0]  # RegionData is only allowed to have a single Extended Component
 
         self.region_comp = data.get_component(self.region_att)
@@ -696,19 +697,6 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
         #  This is a little unnecessary, but keeps code more parallel
         self.mpl_artists = [self.region_collection]
 
-    def check_if_region_cid(self, data, cid):
-        """
-        Check if a ComponentID is in the set of components that regions are over.
-        """
-        if isinstance(data, BaseData):
-            data = data
-        else:  # Subset
-            data = data.data
-        if is_equivalent_cid(data, cid, self.region_x_att) or is_equivalent_cid(data, cid, self.region_y_att):
-            return True
-        else:
-            return False
-
     @defer_draw
     def _update_data(self):
         # Layer artist has been cleared already
@@ -717,8 +705,8 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
 
         try:
             # These must be special attributes that are linked to a region_att
-            if ((not self.check_if_region_cid(self.layer, self._viewer_state.x_att)) and
-                     (not self.check_if_region_cid(self.layer, self._viewer_state.x_att_world))):
+            if ((not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.x_att)) and
+                     (not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.x_att_world))):
                 raise IncompatibleAttribute
             x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
         except (IncompatibleAttribute, IndexError):
@@ -730,8 +718,8 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
 
         try:
             # These must be special attributes that are linked to a region_att
-            if ((not self.check_if_region_cid(self.layer, self._viewer_state.y_att)) and
-                      (not self.check_if_region_cid(self.layer, self._viewer_state.y_att_world))):
+            if ((not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.y_att)) and
+                      (not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.y_att_world))):
                 raise IncompatibleAttribute
             y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
         except (IncompatibleAttribute, IndexError):
@@ -742,9 +730,22 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
             self.enable()
 
         regions = self.layer[self.region_att]
+
+        x_conversion_func = self.data.get_transform_to_cid(self.region_x_att, self._viewer_state.x_att)
+        y_conversion_func = self.data.get_transform_to_cid(self.region_y_att, self._viewer_state.y_att)
+
+        def conversion_func(x, y, z=None):
+            if x_conversion_func:
+                x = x_conversion_func(x)
+            if y_conversion_func:
+                y = y_conversion_func(y)
+            return tuple([x, y])
+        regions = np.array([transform(conversion_func, g) for g in regions])
+
         # If we are using world coordinates (i.e. the regions are specified in world coordinates)
         # we need to transform the geometries of the regions into pixel coordinates for display
-        # We should cache this, since it is a waste to recompute it for certain _update_data calls
+        # Note that this calls a custom version of the transform function from shapely
+        # to accomodate glue WCS objects
         if self._viewer_state._display_world:
             world2pix = self._viewer_state.reference_data.coords.world_to_pixel_values
             regions = np.array([transform_shapely(world2pix, g) for g in regions])

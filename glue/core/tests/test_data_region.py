@@ -2,7 +2,10 @@ import pytest
 import numpy as np
 from shapely.geometry import MultiPolygon, Polygon, Point, LineString
 
-from glue.core.data import RegionData
+from glue.core.link_helpers import LinkTwoWay
+from glue.core.data_collection import DataCollection
+from glue.core.coordinates import Coordinates
+from glue.core.data import RegionData, Data
 from glue.core.component import (Component, ExtendedComponent)
 from glue.core.component_id import ComponentID
 from glue.app.qt import GlueApplication
@@ -35,6 +38,26 @@ def set_up_region_data(shapely_array, cen_x_name, cen_y_name=None, **kwargs):
     return (region_data, cen_x_id, cen_y_id)
 
 
+def forwards(x):
+    return x * 2
+
+
+def backwards(x):
+    return x / 2
+
+
+class _TestCoordinates(Coordinates):
+
+    def __init__(self):
+        super().__init__(pixel_n_dim=2, world_n_dim=2)
+
+    def pixel_to_world_values(self, *args):
+        return tuple([2 * a for a in args])
+
+    def world_to_pixel_values(self, *args):
+        return tuple([0.5 * a for a in args])
+
+
 class TestRegionData:
 
     def setup_class(self):
@@ -60,6 +83,12 @@ class TestRegionData:
 
         ranges = np.array([range_1, range_2])
         self.ranges, self.x_id_ranges, self.y_id_ranges = set_up_region_data(ranges, 'x')
+
+        self.data = Data(label="Test Data")
+        comp = Component(np.random.random((100, 100)))
+        self.comp = comp
+        self.data.coords = _TestCoordinates()
+        self.comp_id = self.data.add_component(comp, 'Test Component')
 
     def test_basic_properties(self):
         assert self.polys_2d.ext_x == self.x_id
@@ -89,6 +118,37 @@ class TestRegionData:
         self.circles.add_component(center_y, 'y2')
         with pytest.raises(ValueError):
             self.circles.add_component(extend_comp, 'new_extended')
+
+    def test_linking_logic(self):
+        self.dc = DataCollection([self.polys_2d, self.data])
+
+        im = self.dc[1]
+        reg = self.dc[0]
+        self.dc.add_link(LinkTwoWay(im.world_component_ids[1], reg.id['x'], forwards=forwards, backwards=backwards))
+        self.dc.add_link(LinkTwoWay(im.world_component_ids[0], reg.id['y'], forwards=forwards, backwards=backwards))
+
+        # To display a region we need to be able to get the regions in the image coordinates
+        # and the function used for that transformation (if any)
+
+        assert im.world_component_ids[1] in reg.externally_derivable_components
+        assert im.world_component_ids[0] in reg.externally_derivable_components
+
+        assert reg.get_transform_to_cid(reg.id['x'], im.world_component_ids[1]) is backwards
+
+
+class TestRegionDataSaveRestore:
+
+    def setup_class(self):
+
+        poly_1 = Polygon([(20, 20), (60, 20), (60, 40), (20, 40)])
+        poly_2 = Polygon([(60, 50), (60, 70), (80, 70), (80, 50)])
+        poly_3 = Polygon([(10, 10), (15, 10), (15, 15), (10, 15)])
+        poly_4 = Polygon([(10, 20), (15, 20), (15, 30), (10, 30), (12, 25)])
+
+        poly_3_4 = MultiPolygon([poly_3, poly_4])
+
+        polys = np.array([poly_1, poly_2, poly_3_4])
+        self.polys_2d, self.x_id, self.y_id = set_up_region_data(polys, 'x', 'y')
 
     def test_save_restore(self, tmpdir):
 
