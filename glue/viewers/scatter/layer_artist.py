@@ -705,8 +705,8 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
 
         try:
             # These must be special attributes that are linked to a region_att
-            if ((not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.x_att)) and
-                     (not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.x_att_world))):
+            if ((not self.data.check_if_linked_cid(self.region_xy_ids, self._viewer_state.x_att)) and
+                     (not self.data.check_if_linked_cid(self.region_xy_ids, self._viewer_state.x_att_world))):
                 raise IncompatibleAttribute
             x = ensure_numerical(self.layer[self._viewer_state.x_att].ravel())
         except (IncompatibleAttribute, IndexError):
@@ -718,8 +718,8 @@ class ScatterRegionLayerArtist(MatplotlibLayerArtist):
 
         try:
             # These must be special attributes that are linked to a region_att
-            if ((not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.y_att)) and
-                      (not self.data.check_if_region_cid(self.region_xy_ids, self._viewer_state.y_att_world))):
+            if ((not self.data.check_if_linked_cid(self.region_xy_ids, self._viewer_state.y_att)) and
+                      (not self.data.check_if_linked_cid(self.region_xy_ids, self._viewer_state.y_att_world))):
                 raise IncompatibleAttribute
             y = ensure_numerical(self.layer[self._viewer_state.y_att].ravel())
         except (IncompatibleAttribute, IndexError):

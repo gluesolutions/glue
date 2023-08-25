@@ -31,7 +31,6 @@ from glue.utils import (compute_statistic, unbroadcast, iterate_chunks,
                         datetime64_to_mpl, categorical_ndarray,
                         format_choices, random_views_for_dask_array)
 from glue.core.coordinate_helpers import axis_label
-from glue.core.link_manager import is_equivalent_cid
 
 
 # Note: leave all the following imports for component and component_id since
@@ -2132,6 +2131,8 @@ class RegionData(Data):
         """
         Check if a ComponentID is in the set of components that regions are over.
         """
+        from glue.core.link_manager import is_equivalent_cid  # avoid circular import
+
         for target_cid in target_cids:
             if is_equivalent_cid(self, target_cid, other_cid):
                 return True
